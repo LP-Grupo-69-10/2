@@ -3,3 +3,6 @@ compile:
 
 run:
 	./a.out
+
+emacs:
+	emacs main.c libs/* &
