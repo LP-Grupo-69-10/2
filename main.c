@@ -40,17 +40,24 @@ int main() {
     words++;
   }
 
-  int cnt = 0;
+  int cnt = 0, max = 0;
   for(int i = 0; i < M; i++) {
     cnt += table[i]->next == NULL ? 1 : 0;
+
+    list l = table[i];
+    int size = 0;
+    while((l = l->next) != NULL)
+      size++;
+
+    max = max < size ? size : max;
   }
 
-  printf("words %d: %d/%d\n", words, (M-cnt), M);
-  print_list(table[4231]);
-  puts(" ");
-  print_list(table[26]);
-  puts(" ");
-  print_list(table[725]);
+  /*
+  printf("words %d\n%d/%d = %.2f\n", words, (M-cnt), M, (float)(M-cnt)/M);
+  printf("max: %d\n", max);
+  */
 
+  print_list(table[hash("5652")]);
+  
   return 0;
 }
