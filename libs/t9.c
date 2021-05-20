@@ -11,10 +11,10 @@
 
 char *t9_map[10] =
   {
-   "0 ",
+   "0",
    "1",
    "2AÃÁÀÂBCÇaãáàâbcç",
-   "3DEÉÊFdeéêf",
+   "3DEÉÊFdeéèêf",
    "4GHIÍghií",
    "5JKLjkl",
    "6MNOÕÓÔmnoõóô",

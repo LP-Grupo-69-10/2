@@ -4,12 +4,12 @@
 // Ana Sofia Teixeira - Guilherme Duarte - Miguel Alves
 // ----------------------------------------------------
 
-#ifndef UTF8_H
-#define UTF8_H
+#include "list.h"
 
-int utf8_luggage(char);
-int utf8_chrlen(char*);
-int utf8_strlen(char*);
-char* next_char(char*);
+#define M 9011
 
-#endif /* UTF8_H */
+typedef list *hash_table;
+
+hash_table new_table();
+int hash(char*);
+void insert_table(hash_table, char*);

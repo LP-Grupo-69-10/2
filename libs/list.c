@@ -6,17 +6,57 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "list.h"
 
-void insert(list l, word *key) {
-  list add = (list)malloc(sizeof(node)), prev;
-  add->key = key;
-  
-  prev = l;
+list new_list() {
+  list l = (list)malloc(sizeof(struct node));
+  l->key  = NULL;
+  l->next = NULL;
 
+  return l;
+}
+
+word* search_list(list l, char *str) {
+  while((l = l->next) != NULL) {
+    if(strcmp(str, l->key->str) == 0)
+      return l->key;
+  }
+
+  return NULL;
+}
+
+void remove_list(list l, char *str) {
+  while(l->next != NULL) {    
+    if(strcmp(str, l->next->key->str) == 0) {
+      list remove = l->next;
+      l->next = l->next->next;
+      free(remove);
+      
+      return;
+    }
+
+    l = l->next;
+  }
+}
+
+void insert_list(list l, char *str) {
+  word *w;
+  if((w = search_list(l, str)) != NULL) {
+    remove_list(l, str);
+    w->freq++;
+  } else {
+    w = new_word();
+    w->str = str;
+    w->freq = 1;
+  }
+
+  list add = new_list(), prev = l;
+  add->key = w;
+  
   while(l->next != NULL) {
     l = l->next;
-    
+
     if(l->key->freq <= add->key->freq) {
       prev->next = add;
       add->next = l;
@@ -24,7 +64,7 @@ void insert(list l, word *key) {
     }    
     prev = l;
   }
-
+  
   // if not returned
   l->next = add;
   add->next = NULL;

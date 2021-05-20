@@ -4,12 +4,13 @@
 // Ana Sofia Teixeira - Guilherme Duarte - Miguel Alves
 // ----------------------------------------------------
 
-#ifndef UTF8_H
-#define UTF8_H
+#include <stdlib.h>
+#include "word.h"
 
-int utf8_luggage(char);
-int utf8_chrlen(char*);
-int utf8_strlen(char*);
-char* next_char(char*);
+word* new_word() {
+  word *w = (word*)malloc(sizeof(word));
+  w->str = NULL;
+  w->freq = 0;
 
-#endif /* UTF8_H */
+  return w;
+}

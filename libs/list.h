@@ -3,13 +3,16 @@
 
 #include "word.h"
 
-typedef struct node_ *list;
-typedef struct node_ {
+typedef struct node *list;
+struct node {
   word *key;
   list next;
-} node;
+};
 
-void insert(list, word*);
-void print_list(list);
+list  new_list();
+word* search_list(list, char*);
+void  remove_list(list, char*);
+void  insert_list(list, char*);
+void  print_list(list);
 
 #endif /* LIST_H */

@@ -4,6 +4,8 @@
 // Ana Sofia Teixeira - Guilherme Duarte - Miguel Alves
 // ----------------------------------------------------
 
+#include <string.h>
+#include <stdlib.h>
 #include "utf8.h"
 
 int utf8_luggage(char chr) {
@@ -28,9 +30,18 @@ int utf8_strlen(char *str) {
   
   for(int i = 0; str[i] != '\0'; i+=bytes) {
     bytes = utf8_chrlen(&str[i]);
-    // printf("%d\n", bytes);
     size++;
   }
 
   return size;
+}
+
+char* next_char(char *str) {
+  int size = utf8_chrlen(str);
+  char *chr = malloc((size+1) * sizeof(char));
+
+  strncpy(chr, str, size);
+  chr[size] = '\0';
+
+  return chr;
 }

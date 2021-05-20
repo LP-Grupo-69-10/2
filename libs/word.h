@@ -12,5 +12,7 @@ typedef struct {
   int   freq;
 } word;
 
+word* new_word();
+
 #endif /* WORD_H  */
 
