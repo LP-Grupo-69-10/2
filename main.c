@@ -11,37 +11,46 @@
 #include "libs/utf8.h"
 #include "libs/word.h"
 #include "libs/list.h"
+#include "libs/hash.h"
+
+char *delim = " .,;?!()[]:\"\n-\'";
+
+void next_word(FILE *fp, char *word) {  
+  int i = 1;
+
+  while(strchr(delim, (word[0] = fgetc(fp))) != NULL);
+  if(feof(fp)) {
+    *word = 0;
+    return;
+  }
+  
+  while(strchr(delim, (word[i] = fgetc(fp))) == NULL) i++;
+  word[i] = 0;
+}
 
 int main() {
-  char *str = "cãozarrão comilão com comichão";
-
-  printf("%s -> %d\n", str, utf8_strlen(str));
-
-  for(int i = 0, offset; str[i] != 0; i+=offset) {
-    offset = utf8_chrlen(&str[i]);
-    
-    char chr[offset+1];
-    strncpy(chr, &str[i], offset);
-    chr[offset] = '\0';
-    
-    printf("%d", t9_getkey(chr));
+  hash_table table = new_table();
+  int words = 0;
+  
+  while(1) {
+    char* word = malloc(20);
+    next_word(stdin, word);
+    if(word[0] == '\0') break;
+    insert_table(table, word);
+    words++;
   }
 
-  printf("\n%d %d\n", (int)strlen(str), (int)utf8_strlen(str));
-
-  list l = (list)malloc(sizeof(node));
-  l->next = NULL;
-
-  char* teste[] = {"ola", "o", "michael", "come", "croissants"};
-  int    freq[] = {10, 20, 30, 40, 50};
-  for(int i = 0; i < 5; i++) {
-    word *w = (word*)malloc(sizeof(word));
-    w->str  = teste[i];
-    w->freq = freq[i];
-    insert(l,w);
+  int cnt = 0;
+  for(int i = 0; i < M; i++) {
+    cnt += table[i]->next == NULL ? 1 : 0;
   }
-  
-  print_list(l);
-  
+
+  printf("words %d: %d/%d\n", words, (M-cnt), M);
+  print_list(table[4231]);
+  puts(" ");
+  print_list(table[26]);
+  puts(" ");
+  print_list(table[725]);
+
   return 0;
 }
