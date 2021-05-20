@@ -21,15 +21,11 @@ hash_table new_table() {
 }
 
 int hash(char *str) {
-  int h = utf8_strlen(str);
-  int sum = 0, bytes = 0;
+  int h = strlen(str);
+  int sum = 0;
 
-  for(int i = 0, power = 1; str[i] != '\0'; i += bytes) {
-    char *cur = next_char(&str[i]); 
-    int t9 = t9_getkey(cur);
-       
-    sum = (sum + t9 * power) % M;
-    bytes = strlen(cur);
+  for(int i = 0, power = 1; str[i]; i++) {
+    sum = (sum + str[i] * power) % M;
     power = (power * 10) % M;
   }
   
@@ -37,5 +33,5 @@ int hash(char *str) {
 }
 
 void insert_table(hash_table table, char *str) {
-  insert_list(table[hash(str)], str);
+  insert_list(table[hash(t9_string(str))], str);
 }

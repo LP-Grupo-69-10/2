@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "t9.h"
+#include "utf8.h"
 
 char *t9_map[10] =
   {
@@ -31,3 +32,17 @@ int t9_getkey(char *chr) {
 
   return -1;
 }
+
+char* t9_string(char *str) {
+  char *t9 = malloc(utf8_strlen(str)*sizeof(char));
+  int bytes = 0, k = 0;
+  
+  for(int i = 0; str[i]; i += bytes) {
+    char *cur = next_char(&str[i]); 
+    t9[k++] = (char)t9_getkey(cur) + '0';
+    
+    bytes = strlen(cur);
+  }
+
+  return t9;
+} 

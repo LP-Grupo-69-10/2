@@ -6,7 +6,7 @@
 
 #include "list.h"
 
-#define M 9011
+#define M 7001
 
 typedef list *hash_table;
 
