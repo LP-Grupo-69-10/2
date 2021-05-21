@@ -15,12 +15,12 @@ char *t9_map[10] =
    "0",
    "1",
    "2AÃÁÀÂBCÇaãáàâbcç",
-   "3DEÉÊFdeéèêf",
+   "3DEÉÈÊFdeéèêf",
    "4GHIÍghií",
    "5JKLjkl",
    "6MNOÕÓÔmnoõóô",
    "7PQRSpqrs",
-   "8TUÚVtuúv",
+   "8TUÚÜVtuúüv",
    "9WXYZwxyz"
   };
 

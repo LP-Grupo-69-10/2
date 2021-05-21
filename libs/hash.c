@@ -24,14 +24,15 @@ int hash(char *str) {
   int h = strlen(str);
   int sum = 0;
 
-  for(int i = 0, power = 1; str[i]; i++) {
-    sum = (sum + str[i] * power) % M;
-    power = (power * 10) % M;
+  for(int i = 0; str[i]; i++) {
+    sum = (sum*10 + (str[i]-'0')) % M;
   }
-  
+
   return (h + sum*20) % M;
 }
 
 void insert_table(hash_table table, char *str) {
+  // printf("%s -> %d\n", str, hash(t9_string(str)));
+  
   insert_list(table[hash(t9_string(str))], str);
 }
