@@ -21,14 +21,13 @@ hash_table new_table() {
 }
 
 int hash(char *str) {
-  int h = strlen(str);
   int sum = 0;
 
   for(int i = 0; str[i]; i++) {
-    sum = (sum*10 + (str[i]-'0')) % M;
+    sum = (sum*11 + (str[i]-'0')) % M;
   }
 
-  return (h + sum*20) % M;
+  return sum;
 }
 
 void insert_table(hash_table table, char *str) {

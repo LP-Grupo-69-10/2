@@ -34,15 +34,18 @@ int t9_getkey(char *chr) {
 }
 
 char* t9_string(char *str) {
-  char *t9 = malloc(utf8_strlen(str)*sizeof(char));
+  char *t9 = malloc(20*sizeof(char));
   int bytes = 0, k = 0;
-  
+
+ 
   for(int i = 0; str[i]; i += bytes) {
-    char *cur = next_char(&str[i]); 
+    char *cur = next_char(&str[i]);
     t9[k++] = (char)t9_getkey(cur) + '0';
     
     bytes = strlen(cur);
   }
 
+  t9[k] = '\0';
+  
   return t9;
 } 
