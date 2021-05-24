@@ -29,55 +29,69 @@ void next_word(FILE *fp, char *word) {
   word[i] = 0;
 }
 
-void t9_autocomplete(hash_table table, char *t9) {
-  int len = strlen(t9);
-  list l = table[hash(t9)];
-
-  while((l = l->next) != NULL) {
-    if(utf8_strlen(l->key->str) == len)
-      printf(" %s", l->key->str);
-  }
-  printf("\n");
-}
-
-int main() {
+void read_file(hash_table table) {
   FILE *fp = fopen(filename, "r");
-  
-  hash_table table = new_table();
-  int words = 0;
-  
+    
   while(1) {
     char* word = malloc(20);
     next_word(fp, word);
+
     if(word[0] == '\0') break;
     insert_table(table, word);
-    words++;
   }
-  
-  /* int cnt = 0, max = 0; */
-  /* for(int i = 0; i < M; i++) { */
-  /*   cnt += table[i]->next == NULL ? 1 : 0; */
 
-  /*   list l = table[i]; */
-  /*   int size = 0; */
-  /*   while((l = l->next) != NULL) */
-  /*     size++; */
-
-  /*   max = max < size ? size : max; */
-  /* } */
-  
-  /* printf("words %d\n%d/%d = %.2f\n", words, (M-cnt), M, (float)(M-cnt)/M); */
-  /* printf("max: %d\n\n", max); */
-  
-  /* print_list(table[hash("6")]); */
-
-  while(1) {
-    char str[20];
-    scanf("%s", str);
-    t9_autocomplete(table, str);
-  }
-  
   fclose(fp);
+}
+
+void t9_autocomplete(hash_table table, char *t9, int original_size) {
+  int flag = 0;
+  list l = table[hash(t9)];
+  
+  while((l = l->next) != NULL) {
+    char *temp = t9_string(l->key->str);
+
+    if(strcmp(temp, t9) == 0) {
+      printf("%s ", l->key->str);
+      flag = 1;
+    }
+    
+    free(temp);
+  }
+
+  if(!flag) {
+    int n = strlen(t9);
+    if(n > 16 || n == original_size+3) return;
+    
+    for(char ch = '2'; ch <= '9'; ch++) {
+      t9[n] = ch;
+      t9_autocomplete(table, t9, original_size);
+      t9[n] = '\0';
+    }
+  }
+  else {
+    printf("-> %s\n", t9);
+  }
+}
+
+int main() {
+  hash_table table = new_table();
+  read_file(table);
+  
+  int p = 0;
+  char ch, t9[20] = {0};
+  while((ch = getchar()) != '\n') {	
+    if(ch == 'D') {
+      t9[--p] = '\0';
+    } else {
+      t9[p++] = ch;
+    }
+
+    getchar();
+    printf("\e[1;1H\e[2J");
+
+    printf("typed: %s\nsugested:\n", t9);
+    t9_autocomplete(table, t9, strlen(t9));
+  }
   
   return 0;
 }
