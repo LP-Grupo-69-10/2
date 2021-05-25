@@ -45,7 +45,8 @@ void insert_list(list l, char *str) {
   if((w = search_list(l, str)) != NULL) {
     remove_list(l, str);
     w->freq++;
-  } else {
+  }
+  else {
     w = new_word();
     w->str = str;
     w->freq = 1;
