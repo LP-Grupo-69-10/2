@@ -43,13 +43,13 @@ void read_file(hash_table table) {
   fclose(fp);
 }
 
-void t9_autocomplete(hash_table table, char *t9, int original_size) {
+int t9_autocomplete(hash_table table, char *t9) {
   int flag = 0;
   list l = table[hash(t9)];
-  
+
   while((l = l->next) != NULL) {
     char *temp = t9_string(l->key->str);
-
+    
     if(strcmp(temp, t9) == 0) {
       printf("%s ", l->key->str);
       flag = 1;
@@ -57,20 +57,43 @@ void t9_autocomplete(hash_table table, char *t9, int original_size) {
     
     free(temp);
   }
+  
+  return flag;
+}
 
-  if(!flag) {
-    int n = strlen(t9);
-    if(n > 16 || n == original_size+3) return;
-    
-    for(char ch = '2'; ch <= '9'; ch++) {
-      t9[n] = ch;
-      t9_autocomplete(table, t9, original_size);
-      t9[n] = '\0';
+void autocomplete(hash_table table, char *t9) {
+  int n = strlen(t9), k = 0, found = -1;
+  
+  char extended[600][20];
+  int depth[600];
+  strcpy(extended[k], t9);
+  depth[k++] = 0;
+  
+  for(int i = 0; i < k; i++) {
+    if(found != -1 && depth[i] > found) {
+      return;
     }
+        
+    if(t9_autocomplete(table, extended[i])) {
+      printf(" -> %s\n", extended[i]);
+      found = depth[i];
+    }
+    
+    else if (found == -1) {
+      int size = strlen(extended[i]);
+      if(depth[i] == 3) continue;
+      
+      for(char ch = '2'; ch <= '9'; ch++) {
+	strcpy(extended[k], extended[i]);
+	extended[k][size] = ch;
+	extended[k][size+1] = '\0';
+	depth[k] = depth[i]+1;
+	k++;
+      }
+    }
+    
   }
-  else {
-    printf("-> %s\n", t9);
-  }
+
 }
 
 int main() {
@@ -90,7 +113,7 @@ int main() {
     printf("\e[1;1H\e[2J");
 
     printf("typed: %s\nsugested:\n", t9);
-    t9_autocomplete(table, t9, strlen(t9));
+    autocomplete(table, t9);
   }
   
   return 0;
