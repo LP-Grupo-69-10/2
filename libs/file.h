@@ -4,14 +4,13 @@
 // Ana Sofia Teixeira - Guilherme Duarte - Miguel Alves
 // ----------------------------------------------------
 
-#ifndef T9_H
-#define T9_H
+#ifndef FILE_H
+#define FILE_H
 
 #include "hash.h"
 
-int t9_getkey(char*);
-char* t9_string(char*);
-int t9_find(hash_table, char*);
-void t9_autocomplete(hash_table, char*);
+void write_tf(hash_table, char*);
+hash_table read_ft(char*);
+void write_out(char*, char*);
 
-#endif /* T9_H */
+#endif /* FILE_H */

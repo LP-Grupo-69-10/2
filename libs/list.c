@@ -52,6 +52,10 @@ void insert_list(list l, char *str) {
     w->freq = 1;
   }
 
+  insert_word(l, w);
+}
+
+void insert_word(list l, word *w) {
   list add = new_list(), prev = l;
   add->key = w;
   
