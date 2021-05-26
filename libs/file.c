@@ -11,7 +11,7 @@
 #include "t9.h"
 
 void write_tf(hash_table table, char *filename) {  
-  FILE *fp = fopen(filename,"wb");
+  FILE *fp = fopen(filename, "wb");
 
   if(fp != NULL) {
     for(int i = 0; i < M; i++) {
@@ -26,8 +26,44 @@ void write_tf(hash_table table, char *filename) {
   fclose(fp);
 }
 
+void write_wf(word *w, char *filename) {
+  FILE *fp = fopen(filename, "rb+");
+
+  if(fp == NULL) {
+    printf("%s: file does not exist\n", filename);
+    return;
+  }
+
+  while(1) {
+    word *t = new_word();
+    t->str = malloc(20*sizeof(char));
+  
+    fread(&t->freq, sizeof(int), 1, fp);
+    if(t->freq == 0) {
+      free(t);
+      break;
+    }
+    
+    int i = 0;
+    while(1) {
+      fread(&t->str[i], sizeof(char), 1, fp);
+      if(t->str[i++] == '\0') break;
+    }
+
+    if(strcmp(w->str, t->str) == 0) {
+      fseek(fp, -(strlen(t->str)+1+4), SEEK_CUR);
+      break;
+    }
+  }
+  
+  fwrite(&w->freq, sizeof(int), 1, fp);
+  fwrite(w->str, sizeof(char), strlen(w->str)+1, fp);
+  
+  fclose(fp);
+}
+
 hash_table read_ft(char *filename) {
-  FILE *fp = fopen(filename,"rb");
+  FILE *fp = fopen(filename, "rb");
   hash_table table = new_table();
   
   if(fp == NULL) return table;
@@ -58,3 +94,32 @@ hash_table read_ft(char *filename) {
   
   return table;
 }
+
+void print_file(char *filename) {
+  FILE *fp = fopen(filename, "rb");
+
+  while(1) {
+    word *t = new_word();
+    t->str = malloc(20*sizeof(char));
+  
+    fread(&t->freq, sizeof(int), 1, fp);
+    if(t->freq == 0) {
+      free(t);
+      break;
+    }
+    
+    int i = 0;
+    while(1) {
+      fread(&t->str[i], sizeof(char), 1, fp);
+      if(t->str[i++] == '\0') break;
+    }
+
+    printf("%s: %d\n", t->str, t->freq);
+  }
+
+  fclose(fp);
+}
+
+
+
+

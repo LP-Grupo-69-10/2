@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "list.h"
+#include "file.h"
 
 list new_list() {
   list l = (list)malloc(sizeof(struct node));

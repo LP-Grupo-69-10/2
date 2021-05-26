@@ -10,7 +10,8 @@
 #include "hash.h"
 
 void write_tf(hash_table, char*);
+void write_wf(word*, char*);
+void print_file(char*);
 hash_table read_ft(char*);
-void write_out(char*, char*);
 
 #endif /* FILE_H */
