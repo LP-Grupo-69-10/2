@@ -17,13 +17,15 @@ int text_index = 0;
 int last_chrlen;
 
 /* Buttons variables */
-char *values[]  = {"1","2","3","4","5","6","7","8","9","N","0","D"};
-char *names[]   = {"1","   2\nABC","   3\nDEF","   4\nGHI","  5\nJKL",
-                   "    6\nMNO","     7\nPQRS","   8\nTUV",
-                   "     9\nWXYZ","Next","0","Delete"};
-char *text[]    = {",.?!;","abcABCãáàâçÃÁÀÂÇ2","defDEFéèêÉÈÊ3",
-                   "ghiGHIíÍ4","jklJKL5","mnoMNOõóôÕÓÔ6","pqrsPQRS7",
-		   "tuvTUVúüÚÜ8","wxyzWXYZ9"};
+char *values[] = {"1","2","3","4","5","6","7","8","9","N","0","D"};
+char *names[]  = {
+  "1","   2\nABC","   3\nDEF","   4\nGHI","  5\nJKL","    6\nMNO",
+  "     7\nPQRS","   8\nTUV", "     9\nWXYZ","Next","0","Delete"
+};
+char *text[]   = {
+  ",.?!;","abcABCãáàâçÃÁÀÂÇ2","defDEFéèêÉÈÊ3", "ghiGHIíÍ4",
+  "jklJKL5","mnoMNOõóôÕÓÔ6","pqrsPQRS7", "tuvTUVúüÚÜ8","wxyzWXYZ9"
+};
 
 /* Toggle predictive text */
 void change_state(GtkWidget *widget, gpointer *data) {
@@ -48,7 +50,28 @@ int get_key(char *str) {
   return atoi(str) - 1;
 }
 
-void button_clicked(GtkWidget *widget, gpointer *data) {
+/* Updates label using multiple clicks to iterate over characters */
+void nokia(char *str, int size, int key, gint64 now) {
+  if(last_pressed == key && now - time_pressed <= 10e5) {
+    text_index = (text_index + last_chrlen) % strlen(text[key]);
+    str[size-last_chrlen] = '\0';
+  }
+  else {
+    text_index = 0;
+  }
+  
+  int len = utf8_chrlen(&text[key][text_index]);
+  char *chr = malloc(len+1);
+  strncpy(chr, &text[key][text_index], len);
+  chr[len] = '\0';      
+  last_chrlen = len;
+  
+  strcat(str, chr);
+  free(chr);
+}
+
+/* Function called by the buttons  */
+void button_click(GtkWidget *widget, gpointer *data) {
   int key = get_key((char*)data);
   gint64 now = g_get_real_time();
   
@@ -64,65 +87,40 @@ void button_clicked(GtkWidget *widget, gpointer *data) {
 
   /* Accept word */
   else if(key == 10) {
-    
+    str = "\0";
   }
   
   /* Delete */
   else if(key == 11) {
     if(size > 0) {
-      while(utf8_luggage(str[--size])); /* juicy juicy code */
+      while(utf8_luggage(str[--size]));
       str[size] = '\0';
     }
   }
 
   /* Pontuation */
   else if(key == 0) {
-    if(last_pressed == key && now - time_pressed <= 10e5) {
-      text_index = (text_index + 1) % strlen(text[key]);
-      str[size-1] = text[key][text_index];
-    }    
-    else {
-      text_index = 0;
-      str[size] = text[key][text_index];
-      str[size+1] = '\0';
-    }
+    nokia(str, size, key, now);
   }
   
   /* Letters */
   else {
-    if(!predictive) {      
-      if(last_pressed == key && now - time_pressed <= 10e5) {
-      	text_index = (text_index + last_chrlen) % strlen(text[key]);
-	str[size-last_chrlen] = '\0';
-      }
-      else {
-	text_index = 0;
-      }
-
-      int len = utf8_chrlen(&text[key][text_index]);
-      char *chr = malloc(len+1);
-      strncpy(chr, &text[key][text_index], len);
-      chr[len] = '\0';      
-      last_chrlen = len;
-      
-      strcat(str, chr);
-      free(chr);
+    if(!predictive) {
+      nokia(str, size, key, now);
     }
     
     else {
       strcat(str, (char*)data);
     }
   }
-
+  
   last_pressed = key;
   time_pressed = now;
   
-  const char *format = "<span foreground=\"grey\" size=\"xx-large\">%s</span>";
-  char *markup;
-  
-  markup = g_markup_printf_escaped (format, str);
-  gtk_label_set_markup(GTK_LABEL (label), markup);
-  g_free (markup);
+  char *format = "<span foreground=\"grey\" size=\"xx-large\">%s</span>";
+  char *markup = g_markup_printf_escaped(format, str);
+  gtk_label_set_markup(GTK_LABEL(label), markup);
+  free(markup);
 }
 
 int main (int argc, char *argv[]) {
@@ -152,7 +150,7 @@ int main (int argc, char *argv[]) {
   
   /* Buttons */
   grid = gtk_grid_new();
-
+  
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 3; j++) {
       int k = i*3 + j;
@@ -160,19 +158,19 @@ int main (int argc, char *argv[]) {
       gtk_grid_attach(GTK_GRID(grid), btns[k], j, i, 1, 1);
       gtk_widget_set_size_request(btns[k], 100, 60);
       g_signal_connect(G_OBJECT(btns[k]), "clicked",
-		       G_CALLBACK(button_clicked), values[k]);
+		       G_CALLBACK(button_click), values[k]);
     }
   }
-
+  
   /* Pack widgets */
   gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(vbox), check, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(vbox), grid,  TRUE, TRUE, 0);
   gtk_container_add (GTK_CONTAINER(window), vbox);
-
+  
   /* Show */
   gtk_widget_show_all(window);
-
+  
   /* Main loop */
   gtk_main();
   
