@@ -14,6 +14,7 @@ gint predictive = 1;
 gint64 time_pressed = 0;
 int last_pressed = -1;
 int text_index = 0;
+int last_chrlen;
 
 /* Buttons variables */
 char *values[]  = {"1","2","3","4","5","6","7","8","9","N","0","D"};
@@ -24,7 +25,7 @@ char *text[]    = {",.?!;","abcABCãáàâçÃÁÀÂÇ2","defDEFéèêÉÈÊ3",
                    "ghiGHIíÍ4","jklJKL5","mnoMNOõóôÕÓÔ6","pqrsPQRS7",
 		   "tuvTUVúüÚÜ8","wxyzWXYZ9"};
 
-/* (De)activate predictive text */
+/* Toggle predictive text */
 void change_state(GtkWidget *widget, gpointer *data) {
   predictive = !predictive;
   gtk_label_set_text((GtkLabel*)label, "\0");
@@ -68,42 +69,51 @@ void button_clicked(GtkWidget *widget, gpointer *data) {
   
   /* Delete */
   else if(key == 11) {
-    if(size != 0) {
-      str[size-1] = '\0';
+    if(size > 0) {
+      while(utf8_luggage(str[--size])); /* juicy juicy code */
+      str[size] = '\0';
     }
   }
 
   /* Pontuation */
   else if(key == 0) {
     if(last_pressed == key && now - time_pressed <= 10e5) {
-      str[size-1] = text[key][text_index];
       text_index = (text_index + 1) % strlen(text[key]);
-    }
-    
+      str[size-1] = text[key][text_index];
+    }    
     else {
-      str[size] = text[key][0];
+      text_index = 0;
+      str[size] = text[key][text_index];
       str[size+1] = '\0';
-      text_index = 1;
     }
   }
   
   /* Letters */
   else {
-    if(!predictive) {
+    if(!predictive) {      
       if(last_pressed == key && now - time_pressed <= 10e5) {
-	
+      	text_index = (text_index + last_chrlen) % strlen(text[key]);
+	str[size-last_chrlen] = '\0';
       }
-      
       else {
-	
-      } 
+	text_index = 0;
+      }
+
+      int len = utf8_chrlen(&text[key][text_index]);
+      char *chr = malloc(len+1);
+      strncpy(chr, &text[key][text_index], len);
+      chr[len] = '\0';      
+      last_chrlen = len;
+      
+      strcat(str, chr);
+      free(chr);
     }
     
     else {
       strcat(str, (char*)data);
     }
   }
-  
+
   last_pressed = key;
   time_pressed = now;
   

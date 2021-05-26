@@ -12,12 +12,8 @@ emacs:
 
 interface:
 	clear
-	gcc -o t9 interface.c `pkg-config --libs --cflags gtk+-3.0`
-	./t9
-
-draw:
-	clear
-	./t9
+	gcc interface.c libs/*.c `pkg-config --libs --cflags gtk+-3.0`
+	./a.out
 
 gtk3:
 	sudo apt-get install libgtk-3-dev
