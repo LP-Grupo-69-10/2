@@ -1,52 +1,118 @@
 #include <gtk/gtk.h>
 #include <string.h>
+#include <stdlib.h>
+#include "libs/utf8.h"
 
+/* Widgets */
 GtkWidget *window, *vbox, *label, *grid, *check;
 GtkWidget *btns[12];
-gint predictive = 1;
-  
-char *values[]  = {"1","2","3","4","5","6","7","8","9","N","0","D"};
-char *strings[] = {"1","   2\nABC","   3\nDEF","   4\nGHI","  5\nJKL","    6\nMNO","     7\nPQRS","   8\nTUV","     9\nWXYZ","Next","0","Delete"};
 
+/* Predictive flag */
+gint predictive = 1;
+
+/* Last button pressed variables */
+gint64 time_pressed = 0;
+int last_pressed = -1;
+int text_index = 0;
+
+/* Buttons variables */
+char *values[]  = {"1","2","3","4","5","6","7","8","9","N","0","D"};
+char *names[]   = {"1","   2\nABC","   3\nDEF","   4\nGHI","  5\nJKL",
+                   "    6\nMNO","     7\nPQRS","   8\nTUV",
+                   "     9\nWXYZ","Next","0","Delete"};
+char *text[]    = {",.?!;","abcABCãáàâçÃÁÀÂÇ2","defDEFéèêÉÈÊ3",
+                   "ghiGHIíÍ4","jklJKL5","mnoMNOõóôÕÓÔ6","pqrsPQRS7",
+		   "tuvTUVúüÚÜ8","wxyzWXYZ9"};
+
+/* (De)activate predictive text */
 void change_state(GtkWidget *widget, gpointer *data) {
   predictive = !predictive;
   gtk_label_set_text((GtkLabel*)label, "\0");
 }
 
+/* Get int key by str key */
+int get_key(char *str) {
+  if(strcmp(str, "N") == 0) {
+    return 9;
+  }
+
+  if(strcmp(str, "0") == 0) {
+    return 10;
+  }
+
+  if(strcmp(str, "D") == 0) {
+    return 11;
+  }
+
+  return atoi(str) - 1;
+}
+
 void button_clicked(GtkWidget *widget, gpointer *data) {
+  int key = get_key((char*)data);
+  gint64 now = g_get_real_time();
+  
   char *str = (char*)gtk_label_get_text((GtkLabel*) label);
+  int size = strlen(str);
   
   /* Next word */
-  if(strcmp((char*)data, "N") == 0) {
+  if(key == 9) {
     if(predictive) {
       
-    } 
+    }
   }
 
   /* Accept word */
-  else if(strcmp((char*)data, "0") == 0) {
+  else if(key == 10) {
     
   }
   
   /* Delete */
-  else if(strcmp((char*)data, "D") == 0) {
-    int n = strlen(str);
-    if(n != 0) {
-      str[n-1] = '\0';
+  else if(key == 11) {
+    if(size != 0) {
+      str[size-1] = '\0';
     }
   }
 
   /* Pontuation */
-  else if(strcmp((char*)data, "1") == 0) {
+  else if(key == 0) {
+    if(last_pressed == key && now - time_pressed <= 10e5) {
+      str[size-1] = text[key][text_index];
+      text_index = (text_index + 1) % strlen(text[key]);
+    }
     
-  }
-
-  /* Letters */
-  else {
-    strcat(str, (char*)data);
+    else {
+      str[size] = text[key][0];
+      str[size+1] = '\0';
+      text_index = 1;
+    }
   }
   
-  gtk_label_set_text((GtkLabel*)label, str);
+  /* Letters */
+  else {
+    if(!predictive) {
+      if(last_pressed == key && now - time_pressed <= 10e5) {
+	
+      }
+      
+      else {
+	
+      } 
+    }
+    
+    else {
+      strcat(str, (char*)data);
+    }
+  }
+  
+  last_pressed = key;
+  time_pressed = now;
+  
+  const char *format = "<span foreground=\"grey\" size=\"xx-large\">%s</span>";
+  char *markup;
+  
+  markup = g_markup_printf_escaped (format, str);
+  gtk_label_set_markup(GTK_LABEL (label), markup);
+  g_free (markup);
 }
 
 int main (int argc, char *argv[]) {
@@ -72,15 +138,15 @@ int main (int argc, char *argv[]) {
   
   /* Label */
   label = gtk_label_new(NULL);
-  gtk_widget_set_size_request(label, 100, 200);
-
+  gtk_widget_set_size_request(label, 300, 200);
+  
   /* Buttons */
   grid = gtk_grid_new();
 
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 3; j++) {
       int k = i*3 + j;
-      btns[k] = gtk_button_new_with_label(strings[k]);
+      btns[k] = gtk_button_new_with_label(names[k]);
       gtk_grid_attach(GTK_GRID(grid), btns[k], j, i, 1, 1);
       gtk_widget_set_size_request(btns[k], 100, 60);
       g_signal_connect(G_OBJECT(btns[k]), "clicked",

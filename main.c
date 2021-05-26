@@ -44,9 +44,15 @@ void read_file(hash_table table) {
   fclose(fp);
 }
 
-
 int main() {
+  /* hash_table table = new_table(); */
+  /* read_file(table); */
+  
   hash_table table = read_ft("cocoxixi.bin");
+
+  /* atualizar no ficheiro é assim */
+  /* write_wf(w, "cocoxixi.bin"); */
+  /* print_file("cocoxixi.bin"); */
   
   int p = 0;
   char ch, t9[20] = {0};
@@ -63,8 +69,8 @@ int main() {
     printf("typed: %s\nsugested:\n", t9);
     t9_autocomplete(table, t9);
   }
-
-  write_tf(table, "cocoxixi.bin");
+  
+  // write_tf(table, "cocoxixi.bin");
   
   return 0;
 }
