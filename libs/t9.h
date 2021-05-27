@@ -11,7 +11,7 @@
 
 int t9_getkey(char*);
 char* t9_string(char*);
-int t9_find(hash_table, char*);
-void t9_autocomplete(hash_table, char*);
+list t9_find(hash_table, char*);
+list t9_autocomplete(hash_table, char*);
 
 #endif /* T9_H */

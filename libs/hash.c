@@ -24,7 +24,7 @@ int hash(char *str) {
   int sum = 0;
 
   for(int i = 0; str[i]; i++) {
-    sum = (sum*11 + (str[i]-'0')) % M;
+    sum = (sum*11 + str[i] - '0') % M;
   }
 
   return sum;

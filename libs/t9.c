@@ -9,6 +9,7 @@
 #include <string.h>
 #include "t9.h"
 #include "utf8.h"
+#include "list.h"
 
 char *t9_map[10] =
   {
@@ -39,6 +40,11 @@ char* t9_string(char *str) {
 
  
   for(int i = 0; str[i]; i += bytes) {
+    if(str[i] == '-' || str[i] == '\'') {
+      bytes = 1;
+      continue;
+    }
+    
     char *cur = next_char(&str[i]);
     t9[k++] = (char)t9_getkey(cur) + '0';
     
@@ -50,44 +56,50 @@ char* t9_string(char *str) {
   return t9;
 }
 
-int t9_find(hash_table table, char *t9) {
-  int flag = 0;
+list t9_find(hash_table table, char *t9) {
   list l = table[hash(t9)];
+  list out = new_list();
 
   while((l = l->next) != NULL) {
     char *temp = t9_string(l->key->str);
     
     if(strcmp(temp, t9) == 0) {
-      printf("%s ", l->key->str);
-      flag = 1;
+      insert_word(out, l->key);
     }
     
     free(temp);
   }
   
-  return flag;
+  return out;
 }
 
-void t9_autocomplete(hash_table table, char *t9) {
+list t9_autocomplete(hash_table table, char *t9) {
   int n = strlen(t9), k = 0, found = -1;
+
+  list out = new_list();
   
   char extended[600][20];
   int depth[600];
+  
   strcpy(extended[k], t9);
   depth[k++] = 0;
   
   for(int i = 0; i < k; i++) {
     if(found != -1 && depth[i] > found) {
-      return;
+      break;
     }
-        
-    if(t9_find(table, extended[i])) {
-      printf("-> %s\n", extended[i]);
+
+    list cur = t9_find(table, extended[i]);
+    if(cur->next != NULL) {
+      while((cur = cur->next) != NULL) {
+	insert_word(out, cur->key);
+      }
+      
       found = depth[i];
     }
     
     else if (found == -1) {
-      if(depth[i] == 3) continue;
+      if(depth[i] == 3 || strlen(extended[i]) == 19) continue;
       
       for(char ch = '2'; ch <= '9'; ch++) {
 	strcpy(extended[k], extended[i]);
@@ -98,4 +110,14 @@ void t9_autocomplete(hash_table table, char *t9) {
       }
     }
   }
+
+  list t = out;
+  while(t->next != NULL) {
+    t = t->next;
+  }
+
+  t->next = out->next;
+  out = out->next;
+
+  return out;
 }

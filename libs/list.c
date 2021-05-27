@@ -9,6 +9,7 @@
 #include <string.h>
 #include "list.h"
 #include "file.h"
+#include "t9.h"
 
 list new_list() {
   list l = (list)malloc(sizeof(struct node));
@@ -20,8 +21,10 @@ list new_list() {
 
 word* search_list(list l, char *str) {
   while((l = l->next) != NULL) {
-    if(strcmp(str, l->key->str) == 0)
+    if(strcmp(str, l->key->str) == 0) {
+      printf("encontrei! %s -> %s\n", l->key->str, t9_string(l->key->str));
       return l->key;
+    }
   }
 
   return NULL;
