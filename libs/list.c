@@ -22,7 +22,6 @@ list new_list() {
 word* search_list(list l, char *str) {
   while((l = l->next) != NULL) {
     if(strcmp(str, l->key->str) == 0) {
-      printf("encontrei! %s -> %s\n", l->key->str, t9_string(l->key->str));
       return l->key;
     }
   }
@@ -52,7 +51,8 @@ void insert_list(list l, char *str) {
   }
   else {
     w = new_word();
-    w->str = str;
+    w->str = malloc(20*sizeof(char));
+    strcpy(w->str, str);
     w->freq = 1;
   }
 
