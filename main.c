@@ -15,19 +15,24 @@
 #include "libs/file.h"
 
 char *filename = "lusiadas.txt";
-char *delim = " .,;?!()[]:\"\n-\'";
+char *delim = " .,;?!()[]:\"\n\'-";
 
 void next_word(FILE *fp, char *word) {  
   int i = 1;
 
   while(strchr(delim, (word[0] = fgetc(fp))) != NULL);
+    
   if(feof(fp)) {
     *word = 0;
     return;
   }
   
   while(strchr(delim, (word[i] = fgetc(fp))) == NULL) i++;
-  word[i] = 0;
+  if(word[i] == '-' || word[i] == '\'') {
+    while(strchr(delim, (word[++i] = fgetc(fp))) == NULL);
+  } word[i] = 0;
+
+  puts(word);
 }
 
 void read_file(hash_table table) {
@@ -45,32 +50,32 @@ void read_file(hash_table table) {
 }
 
 int main() {
-  /* hash_table table = new_table(); */
-  /* read_file(table); */
+  hash_table table = new_table();
+  read_file(table);
   
-  hash_table table = read_ft("cocoxixi.bin");
+  //hash_table table = read_ft("cocoxixi.bin");
 
   /* atualizar no ficheiro é assim */
   /* write_wf(w, "cocoxixi.bin"); */
   /* print_file("cocoxixi.bin"); */
   
-  int p = 0;
-  char ch, t9[20] = {0};
-  while((ch = getchar()) != '\n') {	
-    if(ch == 'D') {
-      t9[--p] = '\0';
-    } else {
-      t9[p++] = ch;
-    }
+  /* int p = 0; */
+  /* char ch, t9[20] = {0}; */
+  /* while((ch = getchar()) != '\n') {	 */
+  /*   if(ch == 'D') { */
+  /*     t9[--p] = '\0'; */
+  /*   } else { */
+  /*     t9[p++] = ch; */
+  /*   } */
 
-    getchar();
-    printf("\e[1;1H\e[2J");
+  /*   getchar(); */
+  /*   printf("\e[1;1H\e[2J"); */
 
-    printf("typed: %s\nsugested:\n", t9);
-    t9_autocomplete(table, t9);
-  }
+  /*   printf("typed: %s\nsugested:\n", t9); */
+  /*   t9_autocomplete(table, t9); */
+  /* } */
   
-  // write_tf(table, "cocoxixi.bin");
+  write_tf(table, "cocoxixi.bin");
   
   return 0;
 }

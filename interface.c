@@ -1,10 +1,20 @@
 #include <gtk/gtk.h>
+
 #include <string.h>
 #include <stdlib.h>
+
+#include "libs/t9.h"
 #include "libs/utf8.h"
+#include "libs/word.h"
+#include "libs/list.h"
+#include "libs/hash.h"
+#include "libs/file.h"
+
+char *filename = "cocoxixi.bin";
+hash_table table;
 
 /* Widgets */
-GtkWidget *window, *vbox, *label, *grid, *check;
+GtkWidget *window, *vbox, *label_str, *label_t9, *grid, *check;
 GtkWidget *btns[12];
 
 /* Predictive flag */
@@ -12,9 +22,9 @@ gint predictive = 1;
 
 /* Last button pressed variables */
 gint64 time_pressed = 0;
-int last_pressed = -1;
-int text_index = 0;
-int last_chrlen;
+gint last_pressed = -1;
+gint text_index = 0;
+gint last_chrlen;
 
 /* Buttons variables */
 char *values[] = {"1","2","3","4","5","6","7","8","9","N","0","D"};
@@ -27,10 +37,17 @@ char *text[]   = {
   "jklJKL5","mnoMNOõóôÕÓÔ6","pqrsPQRS7", "tuvTUVúüÚÜ8","wxyzWXYZ9"
 };
 
+/* T9 string from predictive text */
+char t9[20];
+list predicted;
+
 /* Toggle predictive text */
 void change_state(GtkWidget *widget, gpointer *data) {
   predictive = !predictive;
-  gtk_label_set_text((GtkLabel*)label, "\0");
+  t9[0] = '\0';
+  predicted = NULL;
+  gtk_label_set_text((GtkLabel*)label_str, "\0");
+  gtk_label_set_text((GtkLabel*)label_t9, "\0");
 }
 
 /* Get int key by str key */
@@ -50,12 +67,13 @@ int get_key(char *str) {
   return atoi(str) - 1;
 }
 
-/* Updates label using multiple clicks to iterate over characters */
+/* Updates label_str using multiple clicks to iterate over characters */
 void nokia(char *str, int size, int key, gint64 now) {
   if(last_pressed == key && now - time_pressed <= 10e5) {
     text_index = (text_index + last_chrlen) % strlen(text[key]);
     str[size-last_chrlen] = '\0';
   }
+  
   else {
     text_index = 0;
   }
@@ -75,19 +93,27 @@ void button_click(GtkWidget *widget, gpointer *data) {
   int key = get_key((char*)data);
   gint64 now = g_get_real_time();
   
-  char *str = (char*)gtk_label_get_text((GtkLabel*) label);
+  char *str = (char*)gtk_label_get_text((GtkLabel*) label_str);
   int size = strlen(str);
-  
+  int t9_size = strlen(t9);
+ 
   /* Next word */
   if(key == 9) {
-    if(predictive) {
-      
+    if(predictive && predicted != NULL) {
+      predicted = predicted->next;
+      str = predicted->key->str;
     }
   }
 
   /* Accept word */
   else if(key == 10) {
-    str = "\0";
+    puts(str);
+    insert_table(table, str);
+    word *w = search_list(table[hash(t9_string(str))], str);
+
+    write_wf(w, filename);
+  
+    *str = *t9 = '\0'; /* juicy juicy code */
   }
   
   /* Delete */
@@ -96,8 +122,13 @@ void button_click(GtkWidget *widget, gpointer *data) {
       while(utf8_luggage(str[--size]));
       str[size] = '\0';
     }
+    
+    if(predictive) {
+      t9[t9_size > 0 ? --t9_size : 0] = '\0';
+      predicted = t9_size != 0 ? t9_autocomplete(table, t9) : NULL;
+      str = predicted == NULL ? "" : predicted->key->str;
+    }
   }
-
   /* Pontuation */
   else if(key == 0) {
     nokia(str, size, key, now);
@@ -110,7 +141,9 @@ void button_click(GtkWidget *widget, gpointer *data) {
     }
     
     else {
-      strcat(str, (char*)data);
+      strcat(t9, (char*)data);
+      predicted = t9_autocomplete(table, t9);
+      str = predicted == NULL ? "" : predicted->key->str;
     }
   }
   
@@ -119,11 +152,17 @@ void button_click(GtkWidget *widget, gpointer *data) {
   
   char *format = "<span foreground=\"grey\" size=\"xx-large\">%s</span>";
   char *markup = g_markup_printf_escaped(format, str);
-  gtk_label_set_markup(GTK_LABEL(label), markup);
+  gtk_label_set_markup(GTK_LABEL(label_str), markup);
+
+  format = "<span style=\"italic\" foreground=\"dark blue\" size=\"medium\">%s</span>";
+  markup = g_markup_printf_escaped(format, t9);
+  gtk_label_set_markup(GTK_LABEL(label_t9), markup);
   free(markup);
 }
 
 int main (int argc, char *argv[]) {
+  table = read_ft(filename);
+  
   /* Window init */
   gtk_init(&argc, &argv);
   
@@ -144,9 +183,11 @@ int main (int argc, char *argv[]) {
   g_signal_connect(G_OBJECT(check), "toggled",
 		   G_CALLBACK(change_state), NULL);
   
-  /* Label */
-  label = gtk_label_new(NULL);
-  gtk_widget_set_size_request(label, 300, 200);
+  /* Labels */
+  label_str = gtk_label_new(NULL);
+  gtk_widget_set_size_request(label_str, 300, 200);
+  label_t9 = gtk_label_new(NULL);
+  gtk_widget_set_size_request(label_str, 300, 200);
   
   /* Buttons */
   grid = gtk_grid_new();
@@ -163,7 +204,8 @@ int main (int argc, char *argv[]) {
   }
   
   /* Pack widgets */
-  gtk_box_pack_start(GTK_BOX(vbox), label, TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), label_str, TRUE, TRUE, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), label_t9, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(vbox), check, TRUE, TRUE, 0);
   gtk_box_pack_start(GTK_BOX(vbox), grid,  TRUE, TRUE, 0);
   gtk_container_add (GTK_CONTAINER(window), vbox);
