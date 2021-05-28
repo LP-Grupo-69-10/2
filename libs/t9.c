@@ -14,7 +14,7 @@
 char *t9_map[10] =
   {
    "0",
-   "1",
+   "1.?!,;-\'",
    "2AÃÁÀÂBCÇaãáàâbcç",
    "3DEÉÈÊFdeéèêf",
    "4GHIÍghií",
@@ -38,12 +38,7 @@ char* t9_string(char *str) {
   char *t9 = malloc(32*sizeof(char));
   int bytes = 0, k = 0;
  
-  for(int i = 0; str[i]; i += bytes) {
-    if(str[i] == '-' || str[i] == '\'') {
-      bytes = 1;
-      continue;
-    }
-    
+  for(int i = 0; str[i]; i += bytes) {    
     char *cur = next_char(&str[i]);
     t9[k++] = (char)t9_getkey(cur) + '0';
     
@@ -72,51 +67,37 @@ list t9_find(hash_table table, char *t9) {
   return out;
 }
 
+void t9_autocomplete_limited(hash_table table, char *t9, list out, int max_len) {
+  int len = strlen(t9);
+  if(len > max_len) return;
+
+  list temp = t9_find(table, t9);
+  while((temp = temp->next) != NULL) {
+    insert_word(out, temp->key);
+  }
+  free(temp);
+  
+  for(int i = '1'; i <= '9'; i++) {
+    t9[len] = i;      
+    t9_autocomplete_limited(table, t9, out, max_len);
+    t9[len] = '\0';
+  }
+}
+
 list t9_autocomplete(hash_table table, char *t9) {
-  int n = strlen(t9), k = 0, found = -1;
-
+  int len = strlen(t9);
   list out = new_list();
-  
-  char extended[600][32];
-  int depth[600];
-  
-  strcpy(extended[k], t9);
-  depth[k++] = 0;
-  
-  for(int i = 0; i < k; i++) {
-    if(found != -1 && depth[i] > found) {
-      break;
-    }
 
-    list cur = t9_find(table, extended[i]);
-    if(cur->next != NULL) {
-      while((cur = cur->next) != NULL) {
-	insert_word(out, cur->key);
-      }
-      
-      found = depth[i];
-    }
-    
-    else if (found == -1) {
-      if(depth[i] == 3 || strlen(extended[i]) == 24) continue;
-      
-      for(char ch = '2'; ch <= '9'; ch++) {
-	strcpy(extended[k], extended[i]);
-	extended[k][n+depth[i]] = ch;
-	extended[k][n+depth[i]+1] = '\0';
-	depth[k] = depth[i]+1;
-	k++;
-      }
-    }
+  for(int d = 0; d <= 4 && out->next == NULL; d++) {
+    t9_autocomplete_limited(table, t9, out, len+d);
   }
 
-  list t = out;
-  while(t->next != NULL) {
-    t = t->next;
+  list temp = out;
+  while(temp->next != NULL) {
+    temp = temp->next;
   }
-
-  t->next = out->next;
-  out = out->next;
-
+  temp->next = out->next; // set circular list
+  out = out->next;        // point immeaditly to 1st element
+  
   return out;
 }

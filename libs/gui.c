@@ -20,6 +20,7 @@ char* binname;
 /* Widgets */
 GtkWidget *window, *vbox, *label_str, *label_t9, *grid, *check;
 GtkWidget *btns[12];
+GtkWidget *label_btns[12];
 
 /* Predictive flag */
 gint predictive = 1;
@@ -104,16 +105,6 @@ void button_click(GtkWidget *widget, gpointer *data) {
 
   switch(key) {
     
-  case 0: /* Pontuation */
-    if(size == 24) {
-      break;
-    }
-    
-    if(!predictive) {
-      nokia(str, size, key, now);
-    }
-    break;
-  
   case 9:  /* Next word */
     if(predictive && predicted != NULL) {
       predicted = predicted->next;
@@ -167,8 +158,9 @@ void button_click(GtkWidget *widget, gpointer *data) {
   last_pressed = key;
   time_pressed = now;
   
-  char *format = "<span foreground=\"grey\" size=\"xx-large\">%s</span>";
-  char *markup = g_markup_printf_escaped(format, str);
+  char *format, *markup;
+  format = "<span foreground=\"grey\" size=\"xx-large\">%s</span>";
+  markup = g_markup_printf_escaped(format, str);
   gtk_label_set_markup(GTK_LABEL(label_str), markup);
 
   format = "<span style=\"italic\" foreground=\"dark blue\" size=\"medium\">%s</span>";
@@ -213,11 +205,20 @@ void gui_init(int* argc, char* *argv[], hash_table table_, char* binname_) {
   for(int i = 0; i < 4; i++) {
     for(int j = 0; j < 3; j++) {
       int k = i*3 + j;
-      btns[k] = gtk_button_new_with_label(names[k]);
+      char *format = "<span style=\"italic\" size=\"12000\">%s</span>";
+      char *markup = g_markup_printf_escaped(format, names[k]);
+
+      label_btns[k] = gtk_label_new(NULL);	    
+      gtk_label_set_markup(GTK_LABEL(label_btns[k]), markup);
+      gtk_grid_attach(GTK_GRID(grid), label_btns[k], j, i, 1, 1);
+      
+      btns[k] = gtk_button_new();
       gtk_grid_attach(GTK_GRID(grid), btns[k], j, i, 1, 1);
       gtk_widget_set_size_request(btns[k], 100, 60);
       g_signal_connect(G_OBJECT(btns[k]), "clicked",
 		       G_CALLBACK(button_click), values[k]);
+
+      free(markup);
     }
   }
   
