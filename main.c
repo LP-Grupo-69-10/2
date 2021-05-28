@@ -22,10 +22,12 @@ char *binname  = "dicionario.bin";
 
 int main(int argc, char *argv[]) {
   hash_table table = new_table();
+  // load_ft(table, filename);
   read_ft(table, binname);
 
   gui_init(&argc, &argv, table, binname);
   gtk_main();
+  // write_tf(table, binname);
   
   return 0;
 }
