@@ -1,6 +1,6 @@
 compile:
 	clear
-	gcc -Wall main.c libs/*.c
+	gcc main.c libs/*.c `pkg-config --libs --cflags gtk+-3.0`
 
 run:
 	clear
@@ -9,8 +9,3 @@ run:
 emacs:
 	clear
 	emacs *.c libs/* &
-
-interface:
-	clear
-	gcc interface.c libs/*.c `pkg-config --libs --cflags gtk+-3.0`
-	./a.out
