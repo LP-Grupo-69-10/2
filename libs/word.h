@@ -13,6 +13,7 @@ typedef struct {
 } word;
 
 word* new_word();
+void next_word(FILE*, char*);
 
 #endif /* WORD_H  */
 

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "hash.h"
+#include "word.h"
 #include "t9.h"
 
 void write_tf(hash_table table, char *filename) {  
@@ -36,7 +37,7 @@ void write_wf(word *w, char *filename) {
 
   while(1) {
     word *t = new_word();
-    t->str = malloc(20*sizeof(char));
+    t->str = malloc(32*sizeof(char));
   
     fread(&t->freq, sizeof(int), 1, fp);
     if(t->freq == 0) {
@@ -62,15 +63,16 @@ void write_wf(word *w, char *filename) {
   fclose(fp);
 }
 
-hash_table read_ft(char *filename) {
+void read_ft(hash_table table, char *filename) {
   FILE *fp = fopen(filename, "rb");
-  hash_table table = new_table();
-  
-  if(fp == NULL) return table;
+    
+  if(fp == NULL) {
+    return;
+  }
   
   while(1) {
     word *w = new_word();
-    w->str = malloc(20*sizeof(char));
+    w->str = malloc(32*sizeof(char));
     
     fread(&w->freq, sizeof(int), 1, fp);
 
@@ -91,8 +93,20 @@ hash_table read_ft(char *filename) {
   }
   
   fclose(fp);
-  
-  return table;
+}
+
+void load_ft(hash_table table, char *filename) {
+  FILE *fp = fopen(filename, "r");
+    
+  while(1) {
+    char* word = malloc(20);
+    next_word(fp, word);
+
+    if(word[0] == '\0') break;
+    insert_table(table, word);
+  }
+
+  fclose(fp);
 }
 
 void print_file(char *filename) {
@@ -100,7 +114,7 @@ void print_file(char *filename) {
 
   while(1) {
     word *t = new_word();
-    t->str = malloc(20*sizeof(char));
+    t->str = malloc(32*sizeof(char));
   
     fread(&t->freq, sizeof(int), 1, fp);
     if(t->freq == 0) {

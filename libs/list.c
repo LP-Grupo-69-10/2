@@ -51,7 +51,7 @@ void insert_list(list l, char *str) {
   }
   else {
     w = new_word();
-    w->str = malloc(20*sizeof(char));
+    w->str = malloc(32*sizeof(char));
     strcpy(w->str, str);
     w->freq = 1;
   }

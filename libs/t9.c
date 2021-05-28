@@ -35,9 +35,8 @@ int t9_getkey(char *chr) {
 }
 
 char* t9_string(char *str) {
-  char *t9 = malloc(20*sizeof(char));
+  char *t9 = malloc(32*sizeof(char));
   int bytes = 0, k = 0;
-
  
   for(int i = 0; str[i]; i += bytes) {
     if(str[i] == '-' || str[i] == '\'') {
@@ -78,7 +77,7 @@ list t9_autocomplete(hash_table table, char *t9) {
 
   list out = new_list();
   
-  char extended[600][20];
+  char extended[600][32];
   int depth[600];
   
   strcpy(extended[k], t9);
@@ -99,7 +98,7 @@ list t9_autocomplete(hash_table table, char *t9) {
     }
     
     else if (found == -1) {
-      if(depth[i] == 3 || strlen(extended[i]) == 19) continue;
+      if(depth[i] == 3 || strlen(extended[i]) == 24) continue;
       
       for(char ch = '2'; ch <= '9'; ch++) {
 	strcpy(extended[k], extended[i]);

@@ -4,15 +4,9 @@
 // Ana Sofia Teixeira - Guilherme Duarte - Miguel Alves
 // ----------------------------------------------------
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef GUI_H
+#define GUI_H
 
-#include "hash.h"
+void gui_init(int*, char***, hash_table, char*);
 
-void write_tf(hash_table, char*);
-void write_wf(word*, char*);
-void read_ft(hash_table table, char*);
-void load_ft(hash_table table, char*);
-void print_file(char*);
-
-#endif /* FILE_H */
+#endif /* GUI_H */
