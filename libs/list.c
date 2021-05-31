@@ -43,7 +43,7 @@ void remove_list(list l, char *str) {
   }
 }
 
-void insert_list(list l, char *str) {
+void insert_str(list l, char *str) {
   word *w;
   if((w = search_list(l, str)) != NULL) {
     remove_list(l, str);

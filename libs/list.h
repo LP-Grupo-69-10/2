@@ -12,7 +12,7 @@ struct node {
 list  new_list();
 word* search_list(list, char*);
 void  remove_list(list, char*);
-void  insert_list(list, char*);
+void  insert_str(list, char*);
 void  insert_word(list, word*);
 void  print_list(list);
 

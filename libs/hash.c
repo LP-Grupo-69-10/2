@@ -31,5 +31,7 @@ int hash(char *str) {
 }
 
 void insert_table(hash_table table, char *str) {
-  insert_list(table[hash(t9_string(str))], str);
+  char *t9 = t9_string(str);
+  insert_str(table[hash(t9)], str);
+  free(t9);
 }
