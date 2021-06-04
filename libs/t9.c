@@ -88,7 +88,7 @@ list t9_autocomplete(hash_table table, char *t9) {
   int len = strlen(t9), d;
   list out = new_list(), temp;
 
-  for(d = 0; d <= 4 && out->next == NULL; d++) {
+  for(d = 0; d <= 3 && out->next == NULL; d++) {
     t9_autocomplete_limited(table, t9, out, len+d);
   }
 
