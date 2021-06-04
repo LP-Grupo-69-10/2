@@ -17,17 +17,20 @@
 #include "libs/file.h"
 #include "libs/gui.h"
 
-char *filename = "lusiadas.txt";
-char *binname  = "dicionario.bin";
+char *filename = "files/lusiadas.txt";
+char *binname  = "files/dicionario.bin";
 
 int main(int argc, char *argv[]) {
   hash_table table = new_table();
-  // load_ft(table, filename);
-  read_ft(table, binname);
+
+  
+  if(read_ft(table, binname) != 0) {
+    load_ft(table, filename);
+    write_tf(table, binname);
+  }
 
   gui_init(&argc, &argv, table, binname);
   gtk_main();
-  // write_tf(table, binname);
   
   return 0;
 }
