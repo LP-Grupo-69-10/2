@@ -19,21 +19,19 @@ word* new_word() {
   return w;
 }
 
-void next_word(FILE *fp, char *word) {  
+void next_word(FILE *fp, char *str) {  
   int i = 1;
 
-  while(strchr(delim, (word[0] = fgetc(fp))) != NULL);
+  while(strchr(delim, (str[0] = fgetc(fp))) != NULL);
     
   if(feof(fp)) {
-    *word = 0;
+    *str = 0;
     return;
   }
   
-  while(strchr(delim, (word[i] = fgetc(fp))) == NULL) i++;
-  if(word[i] == '-' || word[i] == '\'') {
-    while(strchr(delim, (word[++i] = fgetc(fp))) == NULL);
-  } word[i] = 0;
-
-  puts(word);
+  while(strchr(delim, (str[i] = fgetc(fp))) == NULL) i++;
+  if(str[i] == '-' || str[i] == '\'') {
+    while(strchr(delim, (str[++i] = fgetc(fp))) == NULL);
+  } str[i] = 0;
 }
 

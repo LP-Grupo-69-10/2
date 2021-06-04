@@ -9,10 +9,9 @@
 
 #include "hash.h"
 
-void write_tf(hash_table, char*);
-void write_wf(word*, char*);
-void read_ft(hash_table table, char*);
-void load_ft(hash_table table, char*);
-void print_file(char*);
+int write_tf(hash_table, char*);
+int write_wf(word*, char*);
+int read_ft(hash_table table, char*);
+int load_ft(hash_table table, char*);
 
 #endif /* FILE_H */

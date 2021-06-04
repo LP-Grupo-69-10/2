@@ -86,30 +86,33 @@ void t9_autocomplete_limited(hash_table table, char *t9, list out, int max_len) 
 
 list t9_autocomplete(hash_table table, char *t9) {
   int len = strlen(t9), d;
-  list out = new_list();
+  list out = new_list(), temp;
 
   for(d = 0; d <= 4 && out->next == NULL; d++) {
     t9_autocomplete_limited(table, t9, out, len+d);
   }
-  
-  // check for better word in next level
-  list temp = new_list();
+
+  /* check for better word in next level */
+  temp = new_list();
   t9_autocomplete_limited(table, t9, temp, len+d);
+  
   while(temp->next != NULL) {
     temp = temp->next;
-    if(temp->key->freq < out->next->key->freq) {
+    
+    if(temp->key->freq <= out->next->key->freq) {
       break;
     } else {
       insert_word(out, temp->key);
     }
   }
   free(temp);
-  
-  // set list to be circular
+
+  /* set list to be circular */
   temp = out;
   while(temp->next != NULL) {
     temp = temp->next;
   }
+  
   temp->next = out->next;
   out = out->next;
   
